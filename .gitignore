@@ -1,0 +1,65 @@
+# ==========================================
+# ReportQA .gitignore
+# Git이 추적하지 않을(GitHub에 올리지 않을) 파일 목록
+# ==========================================
+
+# ---------- 1. 비밀 정보 (가장 중요) ----------
+# API 키, DB 비밀번호가 들어가는 파일
+.env
+.env.*
+# 단, 설정 예시 파일은 올린다 (값은 비워둔 견본)
+!.env.example
+# Streamlit 비밀 설정 파일
+.streamlit/secrets.toml
+
+# ---------- 2. 파이썬 가상환경 ----------
+.venv/
+venv/
+env/
+
+# ---------- 3. 파이썬 실행 시 자동 생성 파일 ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# ---------- 4. 테스트·도구 캐시 ----------
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ---------- 5. 주피터 노트북 자동 저장본 ----------
+.ipynb_checkpoints/
+
+# ---------- 6. 데이터 (PDF·이미지는 용량과 저작권 문제로 제외) ----------
+data/*
+# 단, 문서 출처 목록과 빈 폴더 유지용 파일은 올린다
+!data/sources.csv
+!data/.gitkeep
+
+# ---------- 7. 모델 파일 (용량이 큼) ----------
+models/
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.bin
+
+# ---------- 8. 로그·로컬 DB ----------
+logs/
+*.log
+*.db
+*.sqlite3
+pgdata/
+
+# ---------- 9. 편집기·운영체제 파일 ----------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+# Windows에서 WSL로 파일을 복사할 때 생기는 부가 파일
+*:Zone.Identifier
