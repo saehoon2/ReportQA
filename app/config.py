@@ -41,7 +41,7 @@ class Settings:
     retrieve_top_k: int = field(default_factory=lambda: int(_get("RETRIEVE_TOP_K", 20)))
     rerank_top_k: int = field(default_factory=lambda: int(_get("RERANK_TOP_K", 5)))
     reranker_model: str = field(default_factory=lambda: _get("RERANKER_MODEL", "BAAI/bge-reranker-v2-m3"))
-    relevance_threshold: float = field(default_factory=lambda: float(_get("RELEVANCE_THRESHOLD", 0.0)))
+    relevance_threshold: float = field(default_factory=lambda: float(_get("RELEVANCE_THRESHOLD", 0.3)))
     use_reranker: bool = field(default_factory=lambda: _get("USE_RERANKER", "true").lower() == "true")
 
     # 데이터베이스 (로컬 개발용 기본값. 외부에 공개하는 서버에서는 반드시 .env에서 바꿀 것)

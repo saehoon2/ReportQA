@@ -8,8 +8,9 @@ import re
 
 from rank_bm25 import BM25Okapi
 
-# 남길 품사: 명사(NN*), 숫자(SN), 외국어(SL), 한자(SH), 어근(XR), 동사·형용사(VV, VA)
-_KEEP = ("NN", "SN", "SL", "SH", "XR", "VV", "VA")
+# 남길 품사: 명사(NN*), 숫자(SN), 외국어(SL), 한자(SH), 어근(XR), 명사 뒤에 붙는 말(XSN: '청년'+'층', '고용'+'률'),
+# 동사·형용사(VV, VA). 조사(J*)·어미(E*)·문장부호(SF 등)는 버림
+_KEEP = ("NN", "SN", "SL", "SH", "XR", "XSN", "VV", "VA")
 _kiwi = None
 
 
