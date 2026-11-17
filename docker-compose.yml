@@ -1,6 +1,7 @@
 # ReportQA 실행 구성 (구조도 5)
-#   docker compose up -d db     → DB만 켜기 (5주차: 내 PC에서 서버를 직접 실행할 때)
-# 값은 .env 에서 읽고, 없으면 개발용 기본값(reportqa)을 씁니다.
+#   docker compose up -d --build     → DB·서버·화면 3개를 함께 켜기 → http://localhost:8501
+#   docker compose up -d db          → DB만 켜기 (내 PC에서 서버를 직접 실행할 때)
+# 값은 .env 에서 읽고, 없으면 개발용 기본값을 씁니다. (.env 의 OPENAI_API_KEY 는 필요)
 services:
   db:
     image: pgvector/pgvector:pg17
@@ -17,6 +18,43 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  api:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      POSTGRES_HOST: db                            # 같은 Compose 안에서는 컨테이너 이름으로 접속
+      POSTGRES_PORT: 5432
+      DATA_DIR: /app/data
+    volumes:
+      - ./data:/app/data                           # PDF·차트 이미지·캡션 (내 PC의 data 폴더를 그대로 씀)
+      - ${HOME}/.cache/huggingface:/root/.cache/huggingface   # 리랭커 모델(약 2GB)을 다시 받지 않도록 공유
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  ui:
+    build: .
+    command: ["streamlit", "run", "ui/streamlit_app.py", "--server.port", "8501", "--server.address", "0.0.0.0",
+              "--browser.gatherUsageStats", "false"]
+    environment:
+      API_BASE_URL: http://api:8000
+    volumes:
+      - ./eval:/app/eval:ro                        # 평가 결과 화면이 최신 결과 파일을 읽도록 (읽기 전용)
+    ports:
+      - "127.0.0.1:8501:8501"
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   pgdata:

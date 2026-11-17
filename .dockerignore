@@ -1,0 +1,10 @@
+# 이미지에 넣지 않을 것 (용량·보안)
+.venv
+.git
+.env
+data
+notebooks
+tests
+docs
+**/__pycache__
+*.ipynb

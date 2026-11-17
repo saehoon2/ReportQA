@@ -1,0 +1,30 @@
+# GitHub에 푸시하면 테스트를 자동으로 실행합니다 (Actions 탭에서 결과 확인)
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      # 테스트에는 리랭커 모델이 필요 없으므로 무거운 torch·sentence-transformers 는 빼고 설치
+      - name: 라이브러리 설치
+        run: |
+          grep -vE '^(torch|sentence-transformers)' requirements.txt > /tmp/requirements-ci.txt
+          pip install -r /tmp/requirements-ci.txt
+
+      # API 키 없이 실행 (테스트는 OpenAI를 호출하지 않음)
+      - name: pytest
+        env:
+          OPENAI_API_KEY: test-not-used
+        run: pytest -q
