@@ -58,6 +58,7 @@ cp .env.example .env
 |---|---|---|---|---|
 | `CHUNK_SIZE` | | 선택 | 청크 하나의 최대 글자 수 | `800` |
 | `CHUNK_OVERLAP` | | 선택 | 앞뒤 청크가 겹치는 글자 수. 문장이 잘려 문맥이 끊기는 것을 줄임 | `100` |
+| `MAX_CAPTION_PAGES` | | 선택 | 문서 1개를 처리할 때 새로 만들 차트 캡션의 최대 개수 (Vision 비용 상한, 4주차) | `60` |
 
 > 초기값은 출발점일 뿐이며, 평가 결과를 보고 조정합니다. 바꿀 때마다 `devlog.md`에 이유와 결과를 기록합니다.
 
@@ -67,20 +68,23 @@ cp .env.example .env
 |---|---|---|---|---|
 | `RETRIEVE_TOP_K` | | 선택 | 1차 검색에서 가져올 후보 수 | `20` |
 | `RERANK_TOP_K` | | 선택 | 리랭킹 후 최종으로 쓸 근거 수 | `5` |
-| `RERANKER_MODEL` | | 선택 | 리랭커 모델 이름 | 6주차에 확인 후 기입 |
-| `RELEVANCE_THRESHOLD` | | 선택 | 이 점수보다 낮으면 "모름"으로 답함 | "모름" 문항 평가로 결정 |
+| `RERANKER_MODEL` | | 선택 | 리랭커 모델 이름 (내 컴퓨터에서 실행, 처음 실행 때 약 2GB 내려받음) | `BAAI/bge-reranker-v2-m3` |
+| `USE_RERANKER` | | 선택 | `false`면 리랭커 없이 하이브리드 검색만 사용 (모델을 내려받지 않음) | `true` |
+| `RELEVANCE_THRESHOLD` | | 선택 | 리랭커 1등 점수가 이보다 낮으면 LLM 없이 "찾을 수 없음"으로 답함 | 노트북 06에서 "모름" 문항으로 결정 |
 
 ### 2-5. 데이터베이스 (5주차)
 
 | 이름 | 🔒 | 필수 | 설명 | 예시 값 |
 |---|---|---|---|---|
-| `POSTGRES_USER` | | 필수 | DB 사용자 이름 | `reportqa` |
-| `POSTGRES_PASSWORD` | 🔒 | 필수 | DB 비밀번호 | 직접 정한 값 (`.env`에만) |
-| `POSTGRES_DB` | | 필수 | DB 이름 | `reportqa` |
-| `POSTGRES_HOST` | | 필수 | DB 주소 | 로컬: `localhost` / Docker: `db` |
+| `POSTGRES_USER` | | 선택 | DB 사용자 이름 | `reportqa` (기본값) |
+| `POSTGRES_PASSWORD` | 🔒 | 선택 | DB 비밀번호 | `reportqa` (개발용 기본값) |
+| `POSTGRES_DB` | | 선택 | DB 이름 | `reportqa` (기본값) |
+| `POSTGRES_HOST` | | 선택 | DB 주소 | 로컬: `localhost` (기본값) / Docker: `db` |
 | `POSTGRES_PORT` | | 선택 | DB 포트 번호 | `5432` (기본값) |
 
 > `POSTGRES_HOST`는 실행 방법에 따라 달라집니다. 내 PC에서 바로 실행하면 `localhost`, Docker Compose 안에서 실행하면 컨테이너 이름인 `db`를 씁니다. (구조도 5 참고)
+>
+> **DB 비밀번호 기본값에 대해:** DB는 내 컴퓨터의 Docker 안에서만 돌고, 포트도 `127.0.0.1`(내 컴퓨터)에만 열어 두기 때문에 개발용 기본값(`reportqa`)을 씁니다. `.env`에 값을 적으면 그 값이 우선합니다. **외부에 공개하는 서버에서는 반드시 다른 비밀번호로 바꿉니다.**
 
 ### 2-6. 화면 (7주차)
 
@@ -105,12 +109,11 @@ cp .env.example .env
 
 ---
 
-## 4. 코드에서 읽는 방법 (예정)
+## 4. 코드에서 읽는 방법
 
-- **1~4주차 (노트북):** `python-dotenv` 라이브러리로 `.env`를 읽습니다.
-- **5주차 이후 (서버):** `app/config.py` 한 곳에서 모든 설정을 읽고, 다른 코드는 `config.py`에서 값을 가져다 씁니다. 설정이 한 곳에 모여 있으면 무엇이 쓰이는지 찾기 쉽고, 빠진 필수 값이 있으면 실행할 때 바로 알려줄 수 있습니다.
-
-> 구체적인 코드는 해당 주차에 확인을 받은 뒤 작성합니다.
+- **1~3주차 (노트북):** `python-dotenv` 라이브러리로 `.env`를 읽습니다.
+- **4주차 이후:** [app/config.py](../app/config.py) 한 곳에서 모든 설정을 읽고, 다른 코드는 `from app.config import settings`로 값을 가져다 씁니다. 설정이 한 곳에 모여 있으면 무엇이 쓰이는지 찾기 쉽습니다.
+- 선택 항목은 `.env`에 없으면 위 표의 기본값을 씁니다. `DATA_DIR` 같은 상대 경로는 실행 위치가 아니라 **프로젝트 폴더 기준**으로 해석합니다.
 
 ---
 
@@ -120,3 +123,4 @@ cp .env.example .env
 |---|---|
 | 2026-11-13 | 문서 작성 (전체 항목 초안, 주차별 필요 시점 표시) |
 | 2026-11-16 | JUDGE_MODEL 추가 (3주차 평가용) |
+| 2026-11-17 | MAX_CAPTION_PAGES·USE_RERANKER 추가, 리랭커 모델 확정, DB 항목을 개발용 기본값이 있는 선택 항목으로 변경, app/config.py 도입 |
